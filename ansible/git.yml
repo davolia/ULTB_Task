@@ -23,3 +23,13 @@
       ansible.builtin.command: git config --global user.email "david.arshakyan@gmail.com"
       args:
         chdir: /root/task
+
+    - name: Add remote repository
+      ansible.builtin.command: git remote add origin https://github.com/davolia/ULTB_Task.git
+      args:
+        chdir: /root/task
+
+    - name: Push to the remote repository
+      ansible.builtin.command: git push -u origin master
+      args:
+        chdir: /root/task
