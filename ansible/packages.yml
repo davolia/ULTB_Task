@@ -1,0 +1,29 @@
+---
+- name: Install the packages
+  hosts: all
+  become: yes  # Gain root privileges to install the packages
+  tasks:
+    - name: Clean yum cache
+      ansible.builtin.command: yum clean all
+
+    - name: Update the package index
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+        update_cache: yes  # Ensure the cache is updated
+
+    - name: Install required packages
+      ansible.builtin.yum:
+        name:
+          - nano
+          - git
+          - htop
+          - curl
+          - telnet
+          - yum-utils
+          - net-tools
+          - iptables
+          - device-mapper-persistent-data
+          - lvm2
+          - docker-ce
+        state: latest

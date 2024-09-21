@@ -1,0 +1,62 @@
+---
+- name: Install the Iptables and disable the Firewalld
+  hosts: all
+  become: yes  # Gain root privileges to install the packages
+  tasks:
+
+    - name: Allow related and established connections
+      ansible.builtin.iptables:
+        chain: INPUT
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+
+    - name: Allow multiple ports
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{ item }}"
+        jump: ACCEPT
+      loop:
+        - 22    # SSH
+        - 25    # SMTP
+        - 80    # HTTP
+        - 110   # POP3
+        - 143   # IMAP
+        - 443   # HTTPS
+        - 587   # SMTPS
+        - 993   # IMAPS
+        - 995   # POP3S
+
+    - name: Allow ICMP
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: icmp
+        jump: ACCEPT
+
+    - name: Set default policy to DROP
+      ansible.builtin.iptables:
+        chain: INPUT
+        policy: DROP
+
+    - name: Log dropped packets
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        jump: LOG
+        log_prefix: "iptables drop: "
+        log_level: 4
+
+    - name: Backup current iptables rules
+      ansible.builtin.shell: iptables-save > /etc/sysconfig/iptables.backup
+      args:
+        creates: /etc/sysconfig/iptables.backup
+
+    - name: Stop the firewalld service
+      ansible.builtin.service:
+        name: firewalld
+        state: stopped
+
+    - name: Disable the firewalld service
+      ansible.builtin.service:
+        name: firewalld
+        enabled: no

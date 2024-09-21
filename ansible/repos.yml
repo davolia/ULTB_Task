@@ -1,0 +1,22 @@
+---
+- name: Install the repositories
+  hosts: all
+  become: yes  # Gain root privileges to install the packages
+  tasks:
+
+    - name: Enable EPEL repository
+      ansible.builtin.yum_repository:
+        name: epel
+        description: Extra Packages for Enterprise Linux
+        baseurl: https://download.fedoraproject.org/pub/epel/9/Everything/$basearch
+        enabled: yes
+        gpgcheck: yes
+
+    - name: Install Docker repository
+      ansible.builtin.yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/9/$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg

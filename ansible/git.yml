@@ -1,0 +1,25 @@
+---
+- name: Install the Git
+  hosts: all
+  become: yes  # Gain root privileges to install the packages
+  tasks:
+
+    - name: Ensure the task directory exists
+      ansible.builtin.file:
+        path: /root/task
+        state: directory
+
+    - name: Initialize Git repository
+      ansible.builtin.command: git init
+      args:
+        chdir: /root/task
+
+    - name: Set Git user name
+      ansible.builtin.command: git config --global user.name "David Arshakyan"
+      args:
+        chdir: /root/task
+
+    - name: Set Git user email
+      ansible.builtin.command: git config --global user.email "david.arshakyan@gmail.com"
+      args:
+        chdir: /root/task

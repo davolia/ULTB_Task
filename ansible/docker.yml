@@ -1,0 +1,11 @@
+---
+- name: Install the Docker
+  hosts: all
+  become: yes  # Gain root privileges to install the packages
+  tasks:
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
