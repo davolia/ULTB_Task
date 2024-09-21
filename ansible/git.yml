@@ -4,32 +4,58 @@
   become: yes  # Gain root privileges to install the packages
   tasks:
 
+    - name: Check if task directory exists
+      ansible.builtin.stat:
+        path: /root/task
+      register: task_dir
+
     - name: Ensure the task directory exists
       ansible.builtin.file:
         path: /root/task
         state: directory
+      when: not task_dir.stat.exists
+
+    - name: Check if Git is already initialized
+      ansible.builtin.stat:
+        path: /root/task/.git
+      register: git_dir
 
     - name: Initialize Git repository
       ansible.builtin.command: git init
       args:
         chdir: /root/task
+      when: not git_dir.stat.exists
+
+    - name: Check if Git user.name is configured
+      ansible.builtin.command: git config --global --get user.name
+      register: git_user_name
+      failed_when: git_user_name.rc > 1
+      changed_when: false
 
     - name: Set Git user name
       ansible.builtin.command: git config --global user.name "David Arshakyan"
-      args:
-        chdir: /root/task
+      when: git_user_name.stdout != "David Arshakyan"
+
+    - name: Check if Git user.email is configured
+      ansible.builtin.command: git config --global --get user.email
+      register: git_user_email
+      failed_when: git_user_email.rc > 1
+      changed_when: false
 
     - name: Set Git user email
       ansible.builtin.command: git config --global user.email "david.arshakyan@gmail.com"
+      when: git_user_email.stdout != "david.arshakyan@gmail.com"
+
+    - name: Check if the remote repository is already added
+      ansible.builtin.command: git remote get-url origin
       args:
         chdir: /root/task
+      register: git_remote
+      failed_when: git_remote.rc > 1
+      changed_when: false
 
     - name: Add remote repository
-      ansible.builtin.command: git remote add origin https://github.com/davolia/ULTB_Task.git
+      ansible.builtin.command: git remote add origin git@github.com:davolia/ULTB_Task.git
       args:
         chdir: /root/task
-
-    - name: Push to the remote repository
-      ansible.builtin.command: git push -u origin master
-      args:
-        chdir: /root/task
+      when: git_remote.rc != 0
