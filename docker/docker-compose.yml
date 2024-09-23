@@ -1,0 +1,40 @@
+services:
+  iredmail:
+    image: lejmr/iredmail:mysql-latest
+    restart: unless-stopped
+    container_name: iredmail
+    hostname: mail
+    domainname: davidarshakyan.com
+
+    environment:
+      - DOMAIN=davidarshakyan.com
+      - HOSTNAME=mail.davidarshakyan.com
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SOGO_WORKERS=1
+      - TIMEZONE=Europe/Yerevan
+      - POSTMASTER_PASSWORD=${POSTMASTER_PASSWORD}
+      - IREDAPD_PLUGINS=['reject_null_sender', 'reject_sender_login_mismatch', 'greylisting', 'throttle', 'amavisd_wblist', 'sql_alias_access_policy']
+      - USE_SSL='yes'
+
+    volumes:
+      - iredmail-mysql:/var/lib/mysql
+      - iredmail-vmail:/var/vmail
+      - iredmail-clamav:/var/lib/clamav
+      - /root/task/files/nginx:/etc/nginx/sites-enabled:ro
+      - /root/task/files/certs/iredmail.davidarshakyan.com.crt:/etc/pki/tls/certs/iRedMail.crt:ro
+      - /root/task/files/certs/iredmail.davidarshakyan.com.key:/etc/pki/tls/private/iRedMail.key:ro
+
+    ports:
+      - 80:80
+      - 25:25
+      - 110:110
+      - 143:143
+      - 443:443
+      - 587:587
+      - 993:993
+      - 995:995
+
+volumes:
+  iredmail-mysql:
+  iredmail-vmail:
+  iredmail-clamav:

@@ -22,8 +22,22 @@
           - telnet
           - yum-utils
           - net-tools
+          - bind-utils
           - iptables
           - device-mapper-persistent-data
           - lvm2
+          - mlocate
           - docker-ce
+          - python3-pip
         state: latest
+
+    - block:
+        - name: Download Docker Compose
+          ansible.builtin.command: >
+            curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}" -o /usr/local/bin/docker-compose
+          args:
+            creates: /usr/local/bin/docker-compose  # Only run if the file does not exist
+
+        - name: Make Docker Compose executable
+          ansible.builtin.command: chmod +x /usr/local/bin/docker-compose
+      when: ansible_os_family == "Linux"

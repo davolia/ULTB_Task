@@ -9,3 +9,26 @@
         name: docker
         state: started
         enabled: yes
+
+    - name: Create directory for iRedMail setup
+      ansible.builtin.file:
+        path: /opt/iredmail
+        state: directory
+        owner: root
+        group: root
+
+    - name: Check if iRedMail container exists
+      ansible.builtin.command: docker ps -a --filter "name=iredmail" --format "{{ '{{' }}.Names{{ '}}' }}"
+      register: container_check
+      changed_when: false
+
+    - name: Run Docker Compose if container does not exist
+      ansible.builtin.command: /usr/local/bin/docker-compose -f /root/task/docker/docker-compose.yml up -d
+      args:
+        chdir: /opt/iredmail
+      when: container_check.stdout == ""
+
+    - name: Check if iRedMail container is running
+      fail:
+        msg: "No running iRedMail container found."
+      when: iredmail_container_id.stdout == ""
