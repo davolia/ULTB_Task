@@ -1,0 +1,14 @@
+- name: Parent Playbook
+  hosts: all
+  tasks:
+    - name: Install repos
+      import_playbook: repos.yml
+
+    - name: Install packages
+      import_playbook: packages.yml
+
+    - name: Install and configure iptables and disable firewalld
+      import_playbook: firewall.yml
+
+    - name: Set up Docker
+      import_playbook: docker.yml
