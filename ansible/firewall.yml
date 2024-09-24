@@ -2,8 +2,11 @@
 - name: Install the Iptables and disable the Firewalld
   hosts: all
   become: yes  # Gain root privileges to install the packages
-  tasks:
 
+  vars_files:
+    - variables.yml
+
+  tasks:
     - name: Allow related and established connections
       ansible.builtin.iptables:
         chain: INPUT

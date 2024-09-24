@@ -2,33 +2,32 @@
 - name: Install the Docker
   hosts: all
   become: yes  # Gain root privileges to install the packages
-  tasks:
 
+  vars_files:
+    - variables.yml
+
+  tasks:
     - name: Start Docker service
       ansible.builtin.service:
         name: docker
         state: started
         enabled: yes
 
-    - name: Create directory for iRedMail setup
-      ansible.builtin.file:
-        path: /opt/iredmail
-        state: directory
-        owner: root
-        group: root
-
     - name: Check if iRedMail container exists
       ansible.builtin.command: docker ps -a --filter "name=iredmail" --format "{{ '{{' }}.Names{{ '}}' }}"
-      register: container_check
+      register: iredmail_container_check
       changed_when: false
 
     - name: Run Docker Compose if container does not exist
-      ansible.builtin.command: /usr/local/bin/docker-compose -f /root/task/docker/docker-compose.yml up -d
-      args:
-        chdir: /opt/iredmail
-      when: container_check.stdout == ""
+      ansible.builtin.command: "{{ docker_compose_exe_location }} -f {{ docker_compose_file_location }} up -d"
+      when: iredmail_container_check.stdout == ""
+
+    - name: Identify the Docker container ID
+      command: "docker ps -q --filter ancestor=lejmr/iredmail:mysql-latest"
+      register: iredmail_container_id
 
     - name: Check if iRedMail container is running
       fail:
         msg: "No running iRedMail container found."
       when: iredmail_container_id.stdout == ""
+

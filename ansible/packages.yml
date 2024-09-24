@@ -2,6 +2,10 @@
 - name: Install the packages
   hosts: all
   become: yes  # Gain root privileges to install the packages
+
+  vars_files:
+    - variables.yml
+
   tasks:
     - name: Clean yum cache
       ansible.builtin.command: yum clean all
@@ -34,10 +38,10 @@
     - block:
         - name: Download Docker Compose
           ansible.builtin.command: >
-            curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}" -o /usr/local/bin/docker-compose
+            curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}" -o "{{ docker_compose_exe_location }}"
           args:
-            creates: /usr/local/bin/docker-compose  # Only run if the file does not exist
+            creates: "{{ docker_compose_exe_location }}"
 
         - name: Make Docker Compose executable
-          ansible.builtin.command: chmod +x /usr/local/bin/docker-compose
+          ansible.builtin.command: chmod +x "{{ docker_compose_exe_location }}"
       when: ansible_os_family == "Linux"

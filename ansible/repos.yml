@@ -2,8 +2,11 @@
 - name: Install the repositories
   hosts: all
   become: yes  # Gain root privileges to install the packages
-  tasks:
 
+  vars_files:
+    - variables.yml
+
+  tasks:
     - name: Enable EPEL repository
       ansible.builtin.yum_repository:
         name: epel
