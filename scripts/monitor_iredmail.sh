@@ -41,15 +41,29 @@ check_mail_queue() {
 }
 
 # Function to check if mail services are running
+#check_services() {
+#    services=("postfix" "dovecot")
+#    for service in "${services[@]}"; do
+#        status=$(docker exec $CONTAINER_NAME ps aux | grep $services | grep "active (running)")
+#        if [ -z "$status" ]; then
+#            send_telegram_alert "Alert: ${service} is not running on container ${CONTAINER_NAME}!"
+#        fi
+#    done
+#}
+
 check_services() {
     services=("postfix" "dovecot")
     for service in "${services[@]}"; do
-        status=$(docker exec $CONTAINER_NAME ps aux | grep "active (running)")
-        if [ -z "$status" ]; then
+        # Check the count of the service process running
+        process_count=$(docker exec "$CONTAINER_NAME" ps aux | grep "$service" | grep -v grep | wc -l)
+
+        # If process count is 0, it means the service is not running
+        if [ "$process_count" -eq 0 ]; then
             send_telegram_alert "Alert: ${service} is not running on container ${CONTAINER_NAME}!"
         fi
     done
 }
+
 
 # Main monitoring function
 monitor_mail_server() {
