@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xv
 
 # Telegram bot API token and chat ID for sending notifications
 TELEGRAM_TOKEN="8155906710:AAF9mCPciOo2Zk7OQBYsNnUKjcAeKHdrTbI"
@@ -9,7 +9,7 @@ DISK_USAGE_THRESHOLD=90  # Disk usage percentage threshold
 MAIL_QUEUE_THRESHOLD=100  # Number of mails in queue threshold
 
 # iRedMail Docker container name
-CONTAINER_NAME="iredmail-container"
+CONTAINER_NAME="iredmail"
 
 # Directories to monitor disk usage
 CRITICAL_DIRS=("/var/mail" "/var/log")
@@ -44,7 +44,7 @@ check_mail_queue() {
 #check_services() {
 #    services=("postfix" "dovecot")
 #    for service in "${services[@]}"; do
-#        status=$(docker exec $CONTAINER_NAME ps aux | grep $services | grep "active (running)")
+#        status=$(docker exec $CONTAINER_NAME ps aux | grep $services)
 #        if [ -z "$status" ]; then
 #            send_telegram_alert "Alert: ${service} is not running on container ${CONTAINER_NAME}!"
 #        fi
@@ -54,11 +54,11 @@ check_mail_queue() {
 check_services() {
     services=("postfix" "dovecot")
     for service in "${services[@]}"; do
-        # Check the count of the service process running
-        process_count=$(docker exec "$CONTAINER_NAME" ps aux | grep "$service" | grep -v grep | wc -l)
+        # Check the number of running processes for the service
+        count=$(docker exec "$CONTAINER_NAME" ps aux | grep "$service" | grep -v grep | wc -l)
 
-        # If process count is 0, it means the service is not running
-        if [ "$process_count" -eq 0 ]; then
+        # If the count is 0, send an alert
+        if [ "$count" -eq 0 ]; then
             send_telegram_alert "Alert: ${service} is not running on container ${CONTAINER_NAME}!"
         fi
     done
