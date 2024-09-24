@@ -1,0 +1,19 @@
+---
+- name: Add cron job to monitor iRedMail
+  hosts: 127.0.0.1
+  become: true  # Use become if you need root privileges
+
+  vars_files:
+    - variables.yml
+
+  tasks:
+    - name: Ensure the cron job for monitoring iRedMail exists
+      cron:
+        name: "Monitor iRedMail"
+        minute: "*/5"
+        hour: "*"
+        day: "*"
+        month: "*"
+        weekday: "*"
+        job: "{{ bash_script_location }}"
+        state: present

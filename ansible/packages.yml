@@ -1,6 +1,6 @@
 ---
 - name: Install the packages
-  hosts: all
+  hosts: 127.0.0.1
   become: yes  # Gain root privileges to install the packages
 
   vars_files:
@@ -33,6 +33,8 @@
           - mlocate
           - docker-ce
           - python3-pip
+          - certbot
+          - certbot-nginx
         state: latest
 
     - block:

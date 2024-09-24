@@ -1,6 +1,6 @@
 ---
 - name: Install the Docker
-  hosts: all
+  hosts: 127.0.0.1
   become: yes  # Gain root privileges to install the packages
 
   vars_files:

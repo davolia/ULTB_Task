@@ -1,2 +1,6 @@
-docker_compose_file_location: /root/task/docker/docker-compose.yml
-docker_compose_exe_location: /usr/local/bin/docker-compose
+docker_compose_file_location: "/root/task/docker/docker-compose.yml"
+docker_compose_exe_location: "/usr/local/bin/docker-compose"
+bash_script_location: "/root/task/scripts/monitor_iredmail.sh"
+domain_name: "mail.davidarshakyan.com"
+ssl_directory: "/root/task/files/certs"
+certificate_source_dir: "/etc/letsencrypt/live/{{ domain_name }}"

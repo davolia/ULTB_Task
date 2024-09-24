@@ -1,0 +1,58 @@
+---
+- name: Generate SSL certificate for mail.davidarshakyan.com and move to specific directory
+  hosts: 127.0.0.1
+  become: true
+
+  vars_files:
+    - variables.yml
+
+  tasks:
+    - name: Ensure the SSL directory exists
+      file:
+        path: "{{ ssl_directory }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Check if existing certificate is available
+      stat:
+        path: "{{ certificate_source_dir }}/fullchain.pem"
+      register: cert_stat
+
+    - name: Check if the certificate is expired
+      command: "openssl x509 -in {{ certificate_source_dir }}/fullchain.pem -noout -enddate"
+      register: cert_enddate
+      when: cert_stat.stat.exists
+
+    - name: Set certificate validity
+      set_fact:
+        cert_valid: "{{ cert_stat.stat.exists and 'notAfter=' in cert_enddate.stdout }}"
+
+    - name: Generate SSL certificate using Certbot
+      command: "certbot certonly --standalone --force-renewal -d {{ domain_name }}"
+      register: certbot_output
+      when: not cert_valid  # Only run if the cert is not valid or expired
+      ignore_errors: yes
+
+    - name: Rename and move the certificate files
+      copy:
+        src: "{{ certificate_source_dir }}/fullchain.pem"
+        dest: "{{ ssl_directory }}/{{ domain_name }}.pem"
+        owner: root
+        group: root
+        mode: '0644'
+      when: cert_stat.stat.exists and (cert_valid or (certbot_output is defined and certbot_output.rc == 0))
+
+    - name: Rename and move the private key
+      copy:
+        src: "{{ certificate_source_dir }}/privkey.pem"
+        dest: "{{ ssl_directory }}/{{ domain_name }}_key.pem"
+        owner: root
+        group: root
+        mode: '0600'
+      when: cert_stat.stat.exists and (cert_valid or (certbot_output is defined and certbot_output.rc == 0))
+
+    - name: Print success message
+      debug:
+        msg: "SSL certificates for {{ domain_name }} have been generated and moved to {{ ssl_directory }}"
