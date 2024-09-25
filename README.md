@@ -63,8 +63,9 @@ To fix the problems, we can add these records
 3. Add SPF record ***v=spf1 mx a ip4:IPADDRESS -all***
 4. Add DKIM record ***TXT    dkim._domainkey    "v=DKIM1; p=KEY"***
 5. Add DMARC record ***TXT    _dmarc    v=DMARC1; p=quarantine; rua=mailto:EMAILADDRESS; ruf=mailto:EMAILADDRESS; pct=100***
-6. Check IP Reputation on services like ***MXToolbox***
-7. Monitor and improve deliverability on services like ***SendGrid***
+6. Ask the ISP provider to point ***PTR record*** for the mail server IP
+7. Check IP Reputation on services like ***MXToolbox***
+8. Monitor and improve deliverability on services like ***SendGrid***
 
 
 
